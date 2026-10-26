@@ -2,7 +2,7 @@
 Práctica de evaluación de métricas de rendimiento web.
 
 ## Instrucciones de instalación y arranque local
-1. Clonar el repositorio: `git clone <tu-enlace-del-repo>`
+1. Clonar el repositorio: `git clone https://github.com/SrTurbado/RehabTrack.git`
 2. Instalar dependencias: `npm install`
 3. Iniciar el servidor: `node server.js`
 4. RWD disponible en: `http://localhost:3000/responsive`
