@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TecHardware</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        
+        header {
+            background-color: var(--surface-color);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column; 
+            gap: 12px; 
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }       
+        
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap; /* Permite que los enlaces bajen de línea si es necesario */
+            justify-content: center;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: var(--primary-color); }
+
+        /* Layout Principal */
+        .layout {
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Barra Lateral (Filtros y Gráfico) */
+        .sidebar {
+            background-color: var(--surface-color);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-toggle-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        #sidebar-toggle { display: none; }
+
+        /* Colapso fluido en pantallas pequeñas */
+        .sidebar-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #sidebar-toggle:checked ~ .sidebar-content {
+            display: block;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: linear-gradient(45deg, #1e293b, #334155);
+            border: 1px dashed var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
+
+        /* Cuadrícula de Productos */
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        /* Tarjeta de Producto */
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 15px var(--accent-glow);
+            border-color: var(--primary-color);
+        }
+
+        .card picture {
+            width: 100%;
+            border-bottom: 1px solid var(--border-color);
+            background-color: #000;
+        }
+
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .card-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-specs {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .btn-buy {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .btn-buy:hover { background-color: var(--primary-hover); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Media Queries Fluidas --- */
+
+        /* Tablet (640px - 1024px) */
+        @media (min-width: 640px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            header {
+                flex-direction: row; /* Coloca el título y navegación en la misma línea */
+                justify-content: space-between;
+                padding: 1rem 2rem;
+            }
+        }
+
+        /* Desktop (> 1024px) */
+        @media (min-width: 1024px) {
+            .layout {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .sidebar {
+                width: 280px;
+                min-height: calc(100vh - 70px);
+                border-bottom: none;
+                border-right: 1px solid var(--border-color);
+                position: sticky;
+                top: 70px;
+            }
+            .sidebar-toggle-btn {
+                display: none; /* Ocultar botón en escritorio */
+            }
+            .sidebar-content {
+                display: block; /* Siempre visible en escritorio */
+            }
+            .product-grid {
+                flex: 1;
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>TecHardware</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Catálogo</a></li>
+                <li><a href="#">Ofertas</a></li>
+                <li><a href="#">Soporte</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="layout">
+        <!-- Barra lateral colapsable -->
+        <aside class="sidebar">
+            <label for="sidebar-toggle" class="sidebar-toggle-btn">⚙️ Mostrar Filtros y Análisis</label>
+            <input type="checkbox" id="sidebar-toggle">
+            
+            <div class="sidebar-content">
+                <h3>Filtros Avanzados</h3>
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: var(--text-muted);"><input type="checkbox"> GAMING</label><br>
+                    <label style="color: var(--text-muted);"><input type="checkbox"> ELECTRÓNICA</label><br>
+                    <label style="color: var(--text-muted);"><input type="checkbox"> GADGETS</label>
+                </div>
+                
+                <h3>Comparativa de Rendimiento</h3>
+                <div class="chart-placeholder">
+                    Gráfico de Comparativa
+                </div>
+            </div>
+        </aside>
+
+        <!-- Cuadrícula de 12 Productos -->
+        <main class="product-grid">
+            
+            <!-- TARJETA 1 (Duplicar 11 veces más para cumplir el requerimiento) -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/rtx4050-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/rtx4050-alta.webp" type="image/webp">
+                  <img src="/img/rtx4050.jpg" alt="NVIDIA RTX 4050">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">NVIDIA GeForce RTX 4050</h2>
+                    <div class="card-specs">
+                        <strong>Arquitectura:</strong> Ada Lovelace<br>
+                        <strong>VRAM:</strong> 6 GB GDDR6<br>
+                        <strong>TGP:</strong> 45W - 115W<br>
+                        Optimizado para trazado de rayos y DLSS 3.0.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 2 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/i513-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/i513-alta.webp" type="image/webp">
+                  <img src="/img/i513.jpg" alt="Intel Core i5 13th Gen">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Intel Core i5 13th Gen</h2>
+                    <div class="card-specs">
+                        <strong>Núcleos:</strong> 10 (6 P-cores + 4 E-cores)<br>
+                        <strong>Hilos:</strong> 16<br>
+                        <strong>Frecuencia Base:</strong> 2.5 GHz<br>
+                        Alto rendimiento para multitarea y gaming.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- Agrega 10 tarjetas más siguiendo la misma estructura <article class="card">... -->
+                <!-- TARJETA 3 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/ram16ddr5-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/ram16ddr5-alta.webp" type="image/webp">
+                  <img src="/img/ram16ddr5.jpg" alt="Memoria RAM 16GB DDR5">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Memoria RAM 16GB DDR5</h2>
+                    <div class="card-specs">
+                        <strong>Capacidad:</strong> 16 GB (2x8GB)<br>
+                        <strong>Tipo:</strong> DDR5<br>
+                        <strong>Velocidad:</strong> 4800 MHz<br>
+                        Mayor ancho de banda y eficiencia energética.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 4 -->
+            <article class="card">
+               <picture>
+                  <source media="(max-width: 639px)" srcset="/img/esp32-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/esp32-alta.webp" type="image/webp">
+                  <img src="/img/esp32.jpg" alt="Microcontrolador ESP32">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Microcontrolador ESP32</h2>
+                    <div class="card-specs">
+                        <strong>Conectividad:</strong> Wi-Fi y Bluetooth integrados<br>
+                        <strong>Núcleos:</strong> Dual-core 240 MHz<br>
+                        <strong>Compatibilidad:</strong> C++, MicroPython<br>
+                        Ideal para proyectos IoT y monitoreo de sensores.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 5 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/dht11-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/dht11-alta.webp" type="image/webp">
+                  <img src="/img/dht11.jpg" alt="Módulo Sensor DHT11">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Módulo Sensor DHT11</h2>
+                    <div class="card-specs">
+                        <strong>Tipo:</strong> Temperatura y Humedad<br>
+                        <strong>Voltaje:</strong> 3.3V - 5V<br>
+                        <strong>Salida:</strong> Señal digital<br>
+                        Lecturas precisas para estaciones meteorológicas.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 6 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/ssd1tb-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/ssd1tb-alta.webp" type="image/webp">
+                  <img src="/img/ssd1tb.jpg" alt="SSD 1TB NVMe M.2">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">SSD 1TB NVMe M.2</h2>
+                    <div class="card-specs">
+                        <strong>Formato:</strong> M.2 2280<br>
+                        <strong>Interfaz:</strong> PCIe Gen4 x4<br>
+                        <strong>Lectura:</strong> Hasta 5000 MB/s<br>
+                        Tiempos de carga reducidos para sistemas operativos.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 7 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/placab6-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/placab6-alta.webp" type="image/webp">
+                  <img src="/img/placab6.jpg" alt="Placa Base B650 AM5">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Placa Base B650 AM5</h2>
+                    <div class="card-specs">
+                        <strong>Socket:</strong> AMD AM5<br>
+                        <strong>Factor de forma:</strong> ATX<br>
+                        <strong>Conectividad:</strong> Wi-Fi 6E, 2.5G LAN<br>
+                        Soporte para procesadores Ryzen serie 7000.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 8 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/fuente-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/fuente-alta.webp" type="image/webp">
+                  <img src="/img/fuente.jpg" alt="Fuente de Poder 750W">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Fuente de Poder 750W</h2>
+                    <div class="card-specs">
+                        <strong>Certificación:</strong> 80 PLUS Gold<br>
+                        <strong>Diseño:</strong> Completamente Modular<br>
+                        <strong>Protecciones:</strong> OVP, OPP, SCP, UVP<br>
+                        Suministro de energía estable para equipos de alto consumo.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 9 -->
+            <article class="card">
+               <picture>
+                  <source media="(max-width: 639px)" srcset="/img/gabinete-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/gabinete-alta.webp" type="image/webp">
+                  <img src="/img/gabinete.jpg" alt="Gabinete ATX Mid Tower">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Gabinete ATX Mid Tower</h2>
+                    <div class="card-specs">
+                        <strong>Panel Lateral:</strong> Cristal Templado<br>
+                        <strong>Ventilación:</strong> 3x 120mm ARGB incluidos<br>
+                        <strong>Soporte GPU:</strong> Hasta 340mm<br>
+                        Excelente flujo de aire y gestión de cables.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 10 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/monitor-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/monitor-alta.webp" type="image/webp">
+                  <img src="/img/monitor.jpg" alt="Monitor Gaming 24">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Monitor Gaming 24"</h2>
+                    <div class="card-specs">
+                        <strong>Resolución:</strong> 1920x1080 (FHD)<br>
+                        <strong>Tasa de Refresco:</strong> 144Hz<br>
+                        <strong>Panel:</strong> IPS, 1ms respuesta<br>
+                        Colores vivos y movimiento fluido sin ghosting.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 11 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/teclado-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/teclado-alta.webp" type="image/webp">
+                  <img src="/img/teclado.jpg" alt="Teclado Mecánico RGB">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Teclado Mecánico RGB</h2>
+                    <div class="card-specs">
+                        <strong>Switches:</strong> Red (Lineales)<br>
+                        <strong>Formato:</strong> TKL (80%)<br>
+                        <strong>Iluminación:</strong> RGB personalizable por tecla<br>
+                        Diseño compacto ideal para escritorios reducidos.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+
+            <!-- TARJETA 12 -->
+            <article class="card">
+                <picture>
+                  <source media="(max-width: 639px)" srcset="/img/mouse-baja.webp" type="image/webp">
+                  <source media="(min-width: 640px)" srcset="/img/mouse-alta.webp" type="image/webp">
+                  <img src="/img/mouse.jpg" alt="Mouse Gaming Inalámbrico">
+                </picture>
+                <div class="card-body">
+                    <h2 class="card-title">Mouse Gaming Inalámbrico</h2>
+                    <div class="card-specs">
+                        <strong>Sensor:</strong> Óptico 16,000 DPI<br>
+                        <strong>Conexión:</strong> 2.4 GHz sin retraso<br>
+                        <strong>Batería:</strong> Hasta 60 horas<br>
+                        Precisión absoluta y libertad de movimiento.
+                    </div>
+                    <button class="btn-buy">Añadir al Carrito</button>
+                </div>
+            </article>
+        </main>
+    </div>
+</body>
+</html>
